@@ -15,6 +15,16 @@ module.exports = function(eleventyConfig) {
   // post to a new file like this:
   // eleventyConfig.addLayoutAlias("post", "layouts/my_new_post_layout.njk");
 
+  eleventyConfig.setUseGitIgnore(false);
+
+  eleventyConfig.addWatchTarget("./_tmp/style-tailwind.css");
+
+  eleventyConfig.addPassthroughCopy({ "./_tmp/style-tailwind.css": "./_includes/assets/css/style-tailwind.css" });
+
+  eleventyConfig.addShortcode("version", function () {
+    return String(Date.now());
+  });
+
   // Merge data instead of overriding
   // https://www.11ty.dev/docs/data-deep-merge/
   eleventyConfig.setDataDeepMerge(true);
@@ -64,7 +74,11 @@ module.exports = function(eleventyConfig) {
 
   // Minify HTML output
   eleventyConfig.addTransform("htmlmin", function(content, outputPath) {
-    if (outputPath.indexOf(".html") > -1) {
+    if (
+      process.env.ELEVENTY_PRODUCTION &&
+      outputPath &&
+      outputPath.endsWith(".html")
+    ) {
       let minified = htmlmin.minify(content, {
         useShortDoctype: true,
         removeComments: true,
